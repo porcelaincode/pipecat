@@ -20,9 +20,26 @@ import {LogLevel, RTVIClient, RTVIClientHelper, RTVIEvent} from '@pipecat-ai/cli
 import { DailyTransport } from '@pipecat-ai/daily-transport';
 
 class SearchResponseHelper extends RTVIClientHelper {
+
+  constructor(contentPanel) {
+    super()
+    this.contentPanel = contentPanel
+  }
+
   handleMessage(rtviMessage) {
     console.log("SearchResponseHelper, received message:", rtviMessage)
+    if(rtviMessage.data.rendered_content) {
+      const iframe = document.createElement('iframe');
+      iframe.style.border = "none";
+      iframe.style.width = "100%";
+      iframe.style.height = "100%";
+      iframe.srcdoc = rtviMessage.data.rendered_content;
+      // Clear existing content and adding the new result
+      this.contentPanel.innerHTML = "";
+      this.contentPanel.appendChild(iframe);
+    }
   }
+
   getMessageTypes() {
     return ["bot-llm-search-response"]
   }
@@ -49,7 +66,7 @@ class ChatbotClient {
     this.disconnectBtn = document.getElementById('disconnect-btn');
     this.statusSpan = document.getElementById('connection-status');
     this.debugLog = document.getElementById('debug-log');
-    this.botVideoContainer = document.getElementById('bot-video-container');
+    this.searchResultContainer = document.getElementById('search-result-container');
 
     // Create an audio element for bot's voice output
     this.botAudio = document.createElement('audio');
@@ -223,7 +240,7 @@ class ChatbotClient {
         },
       });
       //this.rtviClient.setLogLevel(LogLevel.DEBUG)
-      this.rtviClient.registerHelper("llm", new SearchResponseHelper())
+      this.rtviClient.registerHelper("llm", new SearchResponseHelper(this.searchResultContainer))
 
       // Set up listeners for media track events
       this.setupTrackListeners();
@@ -271,7 +288,7 @@ class ChatbotClient {
         }
 
         // Clean up video
-        this.botVideoContainer.innerHTML = '';
+        this.searchResultContainer.innerHTML = '';
       } catch (error) {
         this.log(`Error disconnecting: ${error.message}`);
       }
