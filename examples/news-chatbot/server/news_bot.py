@@ -20,6 +20,7 @@ from pipecat.pipeline.runner import PipelineRunner
 from pipecat.pipeline.task import PipelineParams, PipelineTask
 from pipecat.processors.aggregators.openai_llm_context import OpenAILLMContext
 from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
+from pipecat.processors.frameworks.rtvi import RTVIConfig, RTVIProcessor
 from pipecat.services.cartesia import CartesiaTTSService
 from pipecat.services.deepgram import DeepgramSTTService
 from pipecat.services.google import GoogleLLMService, LLMSearchResponseFrame
@@ -103,10 +104,16 @@ async def main():
 
         llm_search_logger = LLMSearchLoggerProcessor()
 
+        #
+        # RTVI events for Pipecat client UI
+        #
+        rtvi = RTVIProcessor(config=RTVIConfig(config=[]))
+
         pipeline = Pipeline(
             [
                 transport.input(),
                 stt,
+                rtvi,
                 context_aggregator.user(),
                 llm,
                 llm_search_logger,
@@ -116,7 +123,17 @@ async def main():
             ]
         )
 
-        task = PipelineTask(pipeline, PipelineParams(allow_interruptions=True))
+        task = PipelineTask(
+            pipeline,
+            PipelineParams(
+                allow_interruptions=True,
+                observers=[rtvi.observer()],
+            ),
+        )
+
+        @rtvi.event_handler("on_client_ready")
+        async def on_client_ready(rtvi):
+            await rtvi.set_bot_ready()
 
         @transport.event_handler("on_first_participant_joined")
         async def on_first_participant_joined(transport, participant):
