@@ -16,8 +16,17 @@
  * - Browser with WebRTC support
  */
 
-import { RTVIClient, RTVIEvent } from '@pipecat-ai/client-js';
+import {LogLevel, RTVIClient, RTVIClientHelper, RTVIEvent} from '@pipecat-ai/client-js';
 import { DailyTransport } from '@pipecat-ai/daily-transport';
+
+class SearchResponseHelper extends RTVIClientHelper {
+  handleMessage(rtviMessage) {
+    console.log("SearchResponseHelper, received message:", rtviMessage)
+  }
+  getMessageTypes() {
+    return ["bot-llm-search-response"]
+  }
+}
 
 /**
  * ChatbotClient handles the connection and media management for a real-time
@@ -213,6 +222,8 @@ class ChatbotClient {
           },
         },
       });
+      //this.rtviClient.setLogLevel(LogLevel.DEBUG)
+      this.rtviClient.registerHelper("llm", new SearchResponseHelper())
 
       // Set up listeners for media track events
       this.setupTrackListeners();
