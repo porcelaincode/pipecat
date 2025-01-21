@@ -28,15 +28,54 @@ class SearchResponseHelper extends RTVIClientHelper {
 
   handleMessage(rtviMessage) {
     console.log("SearchResponseHelper, received message:", rtviMessage)
-    if(rtviMessage.data.rendered_content) {
-      const iframe = document.createElement('iframe');
-      iframe.style.border = "none";
-      iframe.style.width = "100%";
-      iframe.style.height = "100%";
-      iframe.srcdoc = rtviMessage.data.rendered_content;
-      // Clear existing content and adding the new result
+    if (rtviMessage.data) {
+      // Clear existing content
       this.contentPanel.innerHTML = "";
-      this.contentPanel.appendChild(iframe);
+
+      // Create a container for all content
+      const contentContainer = document.createElement('div');
+      contentContainer.className = "content-container";
+
+      // Add the search_result
+      if (rtviMessage.data.search_result) {
+        const searchResultDiv = document.createElement('div');
+        searchResultDiv.className = "search-result";
+        searchResultDiv.textContent = rtviMessage.data.search_result;
+        contentContainer.appendChild(searchResultDiv);
+      }
+
+      // Add the sources
+      if (rtviMessage.data.origins) {
+        const sourcesDiv = document.createElement('div');
+        sourcesDiv.className = "sources";
+
+        const sourcesTitle = document.createElement('h3');
+        sourcesTitle.className = "sources-title";
+        sourcesTitle.textContent = "Sources:";
+        sourcesDiv.appendChild(sourcesTitle);
+
+        rtviMessage.data.origins.forEach(origin => {
+          const sourceLink = document.createElement('a');
+          sourceLink.className = "source-link";
+          sourceLink.href = origin.site_uri;
+          sourceLink.target = "_blank";
+          sourceLink.textContent = origin.site_title;
+          sourcesDiv.appendChild(sourceLink);
+        });
+
+        contentContainer.appendChild(sourcesDiv);
+      }
+
+      // Add the rendered_content in an iframe
+      if (rtviMessage.data.rendered_content) {
+        const iframe = document.createElement('iframe');
+        iframe.className = "iframe-container";
+        iframe.srcdoc = rtviMessage.data.rendered_content;
+        contentContainer.appendChild(iframe);
+      }
+
+      // Append the content container to the content panel
+      this.contentPanel.appendChild(contentContainer);
     }
   }
 

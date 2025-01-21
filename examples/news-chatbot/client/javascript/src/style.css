@@ -57,15 +57,57 @@ button:disabled {
 }
 
 #search-result-container {
-  width: 640px;
-  height: 360px;
   background-color: #e0e0e0;
-  border-radius: 8px;
-  margin: 20px auto;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 20px;
+  width: calc(100% - 40px);
+  height: 450px;
+  overflow: auto;
+}
+
+/* Container for all content */
+.content-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Space between elements */
+    font-family: Arial, sans-serif;
+}
+
+/* Styles for the search result */
+.search-result {
+    font-size: 16px;
+    line-height: 1.5;
+    color: #333;
+}
+
+/* Styles for the sources container */
+.sources {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Space between source links */
+}
+
+.sources-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #444;
+}
+
+/* Styles for source links */
+.source-link {
+    text-decoration: none;
+    color: #1a73e8;
+}
+
+.source-link:hover {
+    text-decoration: underline;
+}
+
+/* Styles for the iframe container */
+.iframe-container {
+    flex: none;
+    width: 100%;
+    height: 400px; /* Adjust height as needed */
+    border: none;
 }
 
 .debug-panel {
